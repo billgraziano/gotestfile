@@ -75,18 +75,18 @@ func process(files []string) error {
 		parms := []string{"test", "-timeout", "30s"}
 		parms = append(parms, path.Join(m, rel))
 		parms = append(parms, "-count=1")
+		//parms = append(parms, "-v")
 		parms = append(parms, "-p=1")
 		parms = append(parms, "-run")
 		parms = append(parms, testRegex)
 		fmt.Printf("cmd: go.exe %s\n", strings.Join(parms, " "))
 
-		out, err := exec.Command("go.exe", parms...).Output()
-		if err != nil {
-			log.Fatal(err)
-		}
+		out, err := exec.Command("go.exe", parms...).CombinedOutput()
 		str := strings.TrimSpace(string(out))
 		fmt.Println(str)
-
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	return nil
 }
