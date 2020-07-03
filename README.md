@@ -3,9 +3,10 @@
 GOTESTFILE.exe reads the tests from a series of test files and runs just those tests.  It simulates the behavior of VSCode's "Run File Tests" command.
 
 ## Usage
-`gotestfile -debug -prefix ABC path/file_test.go [...files]`
+`gotestfile -debug -env ABC path/file_test.go [...files]`
 
-* `-prefix` will print all environment variables with that prefix before the test.
+* `-debug` prints debug information and runs the tests in verbose mode
+* `-env` will print all environment variables with that prefix before the test.
 
 ## Notes
 

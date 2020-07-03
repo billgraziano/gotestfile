@@ -23,11 +23,11 @@ func main() {
 		return
 	}
 
-	var prefix = flag.String("prefix", "", "list environment variables with this prefix")
-	flag.BoolVar(&debug, "debug", false, "enable debug printing")
+	var env = flag.String("env", "", "list environment variables with this prefix")
+	flag.BoolVar(&debug, "debug", false, "enable debug printing and verbose tests")
 	flag.Parse()
-	if prefix != nil {
-		printenv(*prefix)
+	if env != nil {
+		printenv(*env)
 	}
 	err := process(flag.Args())
 	if err != nil {
@@ -67,19 +67,24 @@ func process(files []string) error {
 			return errors.Wrap(err, "tests")
 		}
 
-		if debug {
-			fmt.Printf("tests: %v\n", names)
-		}
+		//if debug {
+		fmt.Printf("tests: %v\n", names)
+		//}
 
 		testRegex := fmt.Sprintf("^(%s)$", strings.Join(names, "|"))
 		parms := []string{"test", "-timeout", "30s"}
 		parms = append(parms, path.Join(m, rel))
 		parms = append(parms, "-count=1")
-		//parms = append(parms, "-v")
+		if debug {
+			parms = append(parms, "-v")
+		}
 		parms = append(parms, "-p=1")
 		parms = append(parms, "-run")
 		parms = append(parms, testRegex)
-		fmt.Printf("cmd: go.exe %s\n", strings.Join(parms, " "))
+		//fmt.Println("tests:", strings.Join(names, ", "))
+		if debug {
+			fmt.Printf("cmd: go.exe %s\n", strings.Join(parms, " "))
+		}
 
 		out, err := exec.Command("go.exe", parms...).CombinedOutput()
 		str := strings.TrimSpace(string(out))
@@ -91,7 +96,7 @@ func process(files []string) error {
 	return nil
 }
 
-// print env variables that match a prefix
+// print environment variables that match prefix
 func printenv(prefix string) {
 	if prefix == "" {
 		return
