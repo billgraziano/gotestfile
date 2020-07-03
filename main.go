@@ -17,8 +17,6 @@ import (
 var debug bool
 
 func main() {
-	// println("starting...")
-	//fmt.Println(os.Args)
 	args := os.Args[1:]
 	if len(args) == 0 {
 		fmt.Println("usage: gotestfile.exe path/file_test.go . . . ")
@@ -63,8 +61,6 @@ func process(files []string) error {
 		if debug {
 			fmt.Printf("file:  %s\n", fq)
 		}
-		//pkg := filepath.Dir(fq)
-		//fmt.Printf("pkg:   %s\n", pkg)
 
 		names, err := parse.Tests(fq, nil)
 		if err != nil {
@@ -95,6 +91,7 @@ func process(files []string) error {
 	return nil
 }
 
+// print env variables that match a prefix
 func printenv(prefix string) {
 	if prefix == "" {
 		return
