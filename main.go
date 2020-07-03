@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +14,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var debug bool
+
 func main() {
 	// println("starting...")
 	//fmt.Println(os.Args)
@@ -21,11 +24,17 @@ func main() {
 		fmt.Println("usage: gotestfile.exe path/file_test.go . . . ")
 		return
 	}
-	err := process(args)
+
+	var prefix = flag.String("prefix", "", "list environment variables with this prefix")
+	flag.BoolVar(&debug, "debug", false, "enable debug printing")
+	flag.Parse()
+	if prefix != nil {
+		printenv(*prefix)
+	}
+	err := process(flag.Args())
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func process(files []string) error {
@@ -33,19 +42,27 @@ func process(files []string) error {
 	if err != nil {
 		return errors.Wrap(err, "os.getwd")
 	}
-	//fmt.Printf("dir:   %s\n", wd)
+	if debug {
+		fmt.Printf("dir:   %s\n", wd)
+	}
 
 	m, err := parse.Module()
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Printf("mod:   %s\n", m)
+	if debug {
+		fmt.Printf("mod:   %s\n", m)
+	}
 
 	for _, f := range files {
 		rel := filepath.Dir(f)
-		//fmt.Printf("rel:   %s\n", rel)
+		if debug {
+			fmt.Printf("rel:   %s\n", rel)
+		}
 		fq := filepath.Join(wd, f)
-		//fmt.Printf("file:  %s\n", fq)
+		if debug {
+			fmt.Printf("file:  %s\n", fq)
+		}
 		//pkg := filepath.Dir(fq)
 		//fmt.Printf("pkg:   %s\n", pkg)
 
@@ -54,7 +71,9 @@ func process(files []string) error {
 			return errors.Wrap(err, "tests")
 		}
 
-		//fmt.Printf("tests: %v\n", names)
+		if debug {
+			fmt.Printf("tests: %v\n", names)
+		}
 
 		testRegex := fmt.Sprintf("^(%s)$", strings.Join(names, "|"))
 		parms := []string{"test", "-timeout", "30s"}
@@ -74,4 +93,16 @@ func process(files []string) error {
 
 	}
 	return nil
+}
+
+func printenv(prefix string) {
+	if prefix == "" {
+		return
+	}
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if strings.HasPrefix(pair[0], prefix) {
+			fmt.Println(e)
+		}
+	}
 }
