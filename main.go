@@ -67,9 +67,9 @@ func process(files []string) error {
 			return errors.Wrap(err, "tests")
 		}
 
-		//if debug {
-		fmt.Printf("tests: %v\n", names)
-		//}
+		if debug {
+			fmt.Printf("        tests: %v...\n", names)
+		}
 
 		testRegex := fmt.Sprintf("^(%s)$", strings.Join(names, "|"))
 		parms := []string{"test", "-timeout", "30s"}
