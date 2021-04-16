@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/billgraziano/gotestfile/parse"
 	"github.com/pkg/errors"
@@ -19,23 +20,31 @@ var debug bool
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
-		fmt.Println("usage: gotestfile.exe path/file_test.go . . . ")
+		fmt.Println("version: 0.1")
+		fmt.Println("usage: gotestfile.exe path/file_test.go . . .")
 		return
 	}
 
+	dur, err := time.ParseDuration("60s")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//var t = flag.Duration("timeout", defaultDuration, "test timeout")
 	var env = flag.String("env", "", "list environment variables with this prefix")
 	flag.BoolVar(&debug, "debug", false, "enable debug printing and verbose tests")
+	flag.DurationVar(&dur, "timeout", dur, "test timeout (60s)")
 	flag.Parse()
 	if env != nil {
 		printenv(*env)
 	}
-	err := process(flag.Args())
+	err = process(flag.Args(), dur)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func process(files []string) error {
+func process(files []string, timeout time.Duration) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return errors.Wrap(err, "os.getwd")
@@ -72,7 +81,7 @@ func process(files []string) error {
 		}
 
 		testRegex := fmt.Sprintf("^(%s)$", strings.Join(names, "|"))
-		parms := []string{"test", "-timeout", "30s"}
+		parms := []string{"test", "-timeout", timeout.String()}
 		parms = append(parms, path.Join(m, rel))
 		parms = append(parms, "-count=1")
 		if debug {
